@@ -168,9 +168,10 @@
       border-radius: 16px;
       overflow:hidden;
       background: radial-gradient(800px 340px at 50% 20%, rgba(110,240,255,0.07), transparent 70%);
-      box-shadow:
-        0 0 0 1px rgba(180,120,255,0.08) inset,
-        0 0 28px rgba(110,240,255,0.08);
+      position: relative;
+      width: 100%;
+      height: 360px; /* Match original canvas height */
+      box-shadow: 0 0 28px rgba(110,240,255,0.08);
     }
 
     canvas{display:block; width:100%; height:auto;}
@@ -319,6 +320,17 @@
       border-radius: 10px;
       box-shadow: 0 0 12px rgba(110,240,255,0.10);
     }
+
+    .scope-img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain; /* Zooms in to fit the container */
+      transform: scale(1.5); /* Zoom in by 50% */
+      transform-origin: top left;
+}
   </style>
 </head>
 <body>
@@ -357,7 +369,7 @@
           <div class="label">Optical Spectrum Display</div>
           <div class="scopeWrap" aria-label="Optical Output">
             <!-- Image placeholder -->
-            <img src="StarPlan.jpg" alt="Optical Imaging" class="scope-img">
+            <img src="starPlan.jpg" alt="Optical Imaging" class="scope-img">
           </div>
         </div>
 
@@ -372,3 +384,40 @@
   </div>
 </body>
 </html>
+
+
+document.addEventListener("DOMContentLoaded", () => {
+  const scopeWrap = document.querySelector(".scopeWrap");
+  const img = document.querySelector(".scope-img");
+
+  let isDragging = false;
+  let startX, startY, scrollLeft, scrollTop;
+
+  // Start dragging
+  scopeWrap.addEventListener("mousedown", (e) => {
+    isDragging = true;
+    startX = e.clientX;
+    startY = e.clientY;
+    scrollLeft = img.scrollLeft;
+    scrollTop = img.scrollTop;
+  });
+
+  // Move during drag
+  document.addEventListener("mousemove", (e) => {
+    if (!isDragging) return;
+
+    const deltaX = e.clientX - startX;
+    const deltaY = e.clientY - startY;
+
+    img.scrollTo({
+      left: scrollLeft - deltaX,
+      top: scrollTop - deltaY,
+      behavior: "smooth"
+    });
+  });
+
+  // End dragging
+  document.addEventListener("mouseup", () => {
+    isDragging = false;
+  });
+});

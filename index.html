@@ -1,43 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Infinite Scroll Image</title>
-  <style>
-    #scroll-container {
-      width: 50%;
-      overflow-x: auto;
-      white-space: nowrap;
-    }
+<div id="infinite-scroll"></div>
 
-    #infinite-img {
-      display: block;
-      width: 200%; /* Adjust based on your image size */
-    }
-  </style>
-</head>
-<body>
-  <div id="scroll-container">
-    <img src="hologram.jpg" alt="Wide Image" id="infinite-img">
-  </div>
-
-  <script>
-    document.getElementById('scroll-container').addEventListener('scroll', function () {
-      const container = this;
-      const img = document.getElementById('infinite-img');
-      const imgWidth = img.offsetWidth;
-      const containerWidth = container.clientWidth;
-
-      // Check if scrolled past the end (loop to start)
-      if (container.scrollLeft >= imgWidth - containerWidth) {
-        container.scrollTo({ left: 0, behavior: 'smooth' });
-      }
-      // Check if scrolled past the start (loop to end)
-      else if (container.scrollLeft <= 0) {
-        container.scrollTo({ left: imgWidth - containerWidth, behavior: 'smooth' });
-      }
-    });
-  </script>
-</body>
-</html>
+#infinite-scroll {
+  width: 100vw;
+  height: 100vh;
+  background-image: url(hologram.jpg);
+  background-size: cover; /* Adjust as needed */
+  background-repeat: repeat-x;
+  overflow-x: auto; /* Allows infinite horizontal scrolling */
+}

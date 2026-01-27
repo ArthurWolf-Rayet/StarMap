@@ -19,7 +19,7 @@
 </head>
 <body>
   <div id="scroll-container">
-    <img src="your-image.jpg" alt="Wide Image" id="infinite-img">
+    <img src="hologram.jpg" alt="Wide Image" id="infinite-img">
   </div>
 
   <script>

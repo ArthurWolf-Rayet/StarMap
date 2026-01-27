@@ -1,10 +1,102 @@
-<div id="infinite-scroll"></div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Background Moving</title>
+  <style>
+    /* Fullscreen background with parallax effect */
+    body {
+      margin: 0;
+      height: 100vh;
+      overflow: hidden;
+      position: relative;
+    }
 
-#infinite-scroll {
-  width: 100vw;
-  height: 100vh;
-  background-image: url(hologram.jpg);
-  background-size: cover; /* Adjust as needed */
-  background-repeat: repeat-x;
-  overflow-x: auto; /* Allows infinite horizontal scrolling */
-}
+    #background {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url('background.jpg');
+      background-size: 200% 200%; /* Larger image for parallax */
+      z-index: -1; /* Place it behind panels */
+    }
+
+    .panel {
+      position: absolute;
+      z-index: 2; /* Ensure panels are above the background */
+      padding: 20px;
+      border-radius: 8px;
+      color: white;
+      font-family: Arial, sans-serif;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+      cursor: default;
+    }
+
+    #panel1 {
+      top: 20%;
+      left: 20%;
+      background-color: rgba(0, 0, 0, 0.6); /* Make text visible */
+    }
+
+    #panel2 {
+      bottom: 20%;
+      right: 20%;
+      width: 300px;
+      height: auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #panel3 {
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: rgba(0, 0, 0, 0.6);
+    }
+
+    #panel4 {
+      top: 10%;
+      right: 10%;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="background"></div>
+
+  <!-- Panel 1 -->
+  <div class="panel" id="panel1">placeholder</div>
+
+  <!-- Panel 2 with static image -->
+  <div class="panel" id="panel2">
+    <img src="room.jpg" alt="Room Image" style="max-width: 100%; max-height: 100%;">
+  </div>
+
+  <!-- Panel 3 (you can add more content here) -->
+  <div class="panel" id="panel3"></div>
+
+  <!-- Panel 4 with two buttons -->
+  <div class="panel" id="panel4">
+    <button>Button1</button>
+    <button>Button2</button>
+  </div>
+
+  <script>
+    // Move background as user moves the cursor
+    document.addEventListener('mousemove', function (e) {
+      const bg = document.getElementById('background');
+      const x = e.clientX / window.innerWidth;
+      const y = e.clientY / window.innerHeight;
+
+      // Move background with some offset for smooth effect
+      bg.style.backgroundPosition = `${x * 100 - 50}% ${y * 100 - 50}%`;
+    });
+  </script>
+</body>
+</html>

@@ -385,41 +385,36 @@
 
 </html>
 <script>  
-  document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", () => {
   const scopeWrap = document.querySelector(".scopeWrap");
- const img = document.querySelector(".scope-img");
+  const img = document.querySelector(".scope-img");
 
-  let isDragging = false;
-  let startX, startY, scrollLeft, scrollTop;
+  let scrollLeft = img.scrollLeft;
+  let scrollTop = img.scrollTop;
 
-  // Start dragging
-  scopeWrap.addEventListener("mousedown", (e) => {
-    isDragging = true;
-    startX = e.clientX;
-    startY = e.clientY;
+  // Listen for wheel scrolling
+  scopeWrap.addEventListener("wheel", (e) => {
+    // Prevent default scroll behavior
+    e.preventDefault();
+
+    // Calculate how much to scroll based on wheel delta
+    const sensitivity = 0.5; // Adjust this value for faster/slower scrolling
+
+    const deltaX = -e.deltaX * sensitivity;
+    const deltaY = -e.deltaY * sensitivity;
+
+    img.scrollTo({
+      left: scrollLeft + deltaX,
+      top: scrollTop + deltaY,
+      behavior: "smooth" // Optional — smooth scrolling
+    });
+
+    // Update scroll position for next frame
     scrollLeft = img.scrollLeft;
     scrollTop = img.scrollTop;
   });
-
-  // Move during drag
-  document.addEventListener("mousemove", (e) => {
-    if (!isDragging) return;
-
-    const deltaX = e.clientX - startX;
-    const deltaY = e.clientY - startY;
-
-    img.scrollTo({
-      left: scrollLeft - deltaX,
-      top: scrollTop - deltaY,
-      behavior: "smooth"
-    });
-  });
-
-  // End dragging
-  document.addEventListener("mouseup", () => {
-    isDragging = false;
-  });
 });
+
 </script>
 
 

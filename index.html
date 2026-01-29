@@ -188,37 +188,37 @@
   </div>
 </body>
 <Script> 
-// Load image paths from Q.txt and display one random image
+let imagePaths = [];
+
+// Load image paths from Q.txt on page load
 fetch('Q.txt')
   .then(res => res.text())
   .then(data => {
-    const imagePaths = data.split('\n').filter(path => path.trim() !== '');
+    // Parse the file into an array of image paths
+    imagePaths = data.split('\n').filter(path => path.trim() !== '');
 
     if (imagePaths.length === 0) {
       alert("No images found in Q.txt");
       return;
     }
 
-    // Display a random image
+    // Display a random image on load
     displayImage(imagePaths);
   })
   .catch(error => console.error('Error loading Q.txt:', error));
 
 function displayImage(paths) {
-  const img = document.getElementById('starscope-img');
-  const btn = document.getElementById('generate-btn');
+  const img = document.getElementById("starscope-img");
+  const btn = document.getElementById("generate-btn");
 
-  if (!btn) return;
+  if (!btn || !img) return;
 
   const randomIndex = Math.floor(Math.random() * paths.length);
-  const imagePath = paths[randomIndex];
-  
-  // Ensure image is relative or absolute path
-  img.src = imagePath;
+  img.src = paths[randomIndex];
 }
 
-// Generate New button click handler
-document.getElementById('generate-btn').addEventListener('click', () => {
+// "Generate New" button click handler
+document.getElementById("generate-btn").addEventListener("click", () => {
   displayImage(imagePaths); // Use the same list from Q.txt
 });
 

@@ -163,16 +163,16 @@
       margin:0 0 10px;
     }
 
-    .scopeWrap{
-      border: 1px solid rgba(110,240,255,0.16);
-      border-radius: 16px;
-      overflow:hidden;
-      background: radial-gradient(800px 340px at 50% 20%, rgba(110,240,255,0.07), transparent 70%);
-      position: relative;
-      width: 100%;
-      height: 360px; /* Match original canvas height */
-      box-shadow: 0 0 28px rgba(110,240,255,0.08);
-    }
+    .scopeWrap {
+  border: 1px solid rgba(110,240,255,0.16);
+  border-radius: 16px;
+  overflow: hidden; /* Prevents image from overflowing */
+  position: relative;
+  width: 100%;
+  height: 360px; /* Keep this fixed for layout consistency */
+  box-shadow: 0 0 28px rgba(110,240,255,0.08);
+}
+
 
     canvas{display:block; width:100%; height:auto;}
 
@@ -321,15 +321,16 @@
       box-shadow: 0 0 12px rgba(110,240,255,0.10);
     }
 
-    .scope-img {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      transform: scale(1); /* Zoom in by 50% */
-      transform-origin: top left;
+.scope-img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain; /* Scales the image to fit within container, preserving aspect ratio */
+  transform: scale(1); /* No zoom unless you change this */
 }
+
   </style>
 </head>
 <body>
@@ -386,33 +387,30 @@
 
 <script>  
 document.addEventListener("DOMContentLoaded", () => {
-  const scopeWrap = document.querySelector(".scopeWrap");
-  const img = document.querySelector(".scope-img");
+  const imageContainer = document.getElementById("dynamicImage");
+  const generateBtn = document.getElementById("generateBtn");
 
-  let scrollLeft = img.scrollLeft;
-  let scrollTop = img.scrollTop;
+  // Read Q.txt file and load images
+  fetch('Q.txt')
+    .then(response => response.text())
+    .then(data => {
+      const imageFiles = data.split('\n').map(line => line.trim()).filter(file => file !== '');
+      if (imageFiles.length === 0) return;
 
-  // Listen for wheel scrolling
-  scopeWrap.addEventListener("wheel", (e) => {
-    // Prevent default scroll behavior
-    e.preventDefault();
+      // Display a random image on load
+      showRandomImage(imageFiles);
+      
+      // Add event listener to "Generate New" button
+      generateBtn.addEventListener("click", () => {
+        showRandomImage(imageFiles);
+      });
+    })
+    .catch(err => console.error('Failed to load Q.txt:', err));
 
-    // Calculate how much to scroll based on wheel delta
-    const sensitivity = 0.5; // Adjust this value for faster/slower scrolling
-
-    const deltaX = -e.deltaX * sensitivity;
-    const deltaY = -e.deltaY * sensitivity;
-
-    img.scrollTo({
-      left: scrollLeft + deltaX,
-      top: scrollTop + deltaY,
-      behavior: "smooth" // Optional — smooth scrolling
-    });
-
-    // Update scroll position for next frame
-    scrollLeft = img.scrollLeft;
-    scrollTop = img.scrollTop;
-  });
+  function showRandomImage(files) {
+    const randomFile = files[Math.floor(Math.random() * files.length)];
+    imageContainer.src = randomFile;
+  }
 });
 
 </script>

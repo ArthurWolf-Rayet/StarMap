@@ -164,8 +164,29 @@
 }
   </style>
 </head>
+<body>
 
-</html>
+  <!-- Title Card -->
+  <div class="wrap">
+    <h1>Padua Redemption</h1>
+
+    <!-- Main Content Area -->
+    <div class="card">
+      <!-- StarScope Panel -->
+      <div class="star-scope">
+        <img id="starscope-img" src="" alt="StarScope Image" />
+        <div class="pill">
+          <button id="generate-btn">Generate New</button>
+        </div>
+      </div>
+
+      <!-- Optional: Other Panel (e.g. for additional content) -->
+      <div class="other-panel">
+        <!-- Future content goes here -->
+      </div>
+    </div>
+  </div>
+</body>
 <Script> 
 // Load image paths from Q.txt and display one random image
 fetch('Q.txt')
@@ -202,3 +223,4 @@ document.getElementById('generate-btn').addEventListener('click', () => {
 });
 
 </Script>
+</html>

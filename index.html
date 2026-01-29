@@ -1,198 +1,480 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<title>Padua Redemption – NavData Computation</title>
-
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Padua Redemption: Nav Comp</title>
 <style>
-/* --------------------- 1️⃣ Palette & Basics -------------------------------- */
 :root{
-  --bg0:#05070c;     /* deep dark */
-  --bg1:#070b12;
-  --border:rgba(110,240,255,.22);
-  --text:rgba(235,250,255,.92);
-  --good:rgba(120,255,200,.95);
-  --bad:rgba(255,120,140,.95);
+  /* Sci-fi palette */
+  --bg0:#05070c; --bg1:#070b12;
+  --panel: rgba(10, 16, 26, 0.72);
+  --border: rgba(110, 240, 255, 0.22);
+  --text: rgba(235, 250, 255, 0.92);
+  --muted: rgba(235, 250, 255, 0.62);
+  --cyan: rgba(110, 240, 255, 0.95);
+  --purple: rgba(180, 120, 255, 0.95);
+  --good: rgba(120, 255, 200, 0.95);
+  --bad: rgba(255, 120, 140, 0.95);
 }
-*,*::before,*::after{box-sizing:border-box;}
-html,body{
-  height:100%;margin:0;
-  display:grid;place-items:center;
+
+*{box-sizing:border-box}
+html, body { height: 100%; }
+body{
+  margin:0; min-height:100vh;
+  display:grid; place-items:center; padding:28px;
+  color:var(--text);
+  font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
   background:
-    radial-gradient(1200px 700px at 20% 15%,rgba(110,240,255,.12),transparent 55%),
-    radial-gradient(1000px 650px at 80% 30%,rgba(180,120,255,.10),transparent 60%),
-    linear-gradient(180deg,var(--bg0),var(--bg1));
+    radial-gradient(1200px 700px at 20% 15%, rgba(110,240,255,0.12), transparent 55%),
+    radial-gradient(1000px 650px at 80% 30%, rgba(180,120,255,0.10), transparent 60%),
+    linear-gradient(180deg, var(--bg0), var(--bg1));
   overflow-x:hidden;
 }
 
-/* animated background & scanlines – unchanged */
-body::before{content:"";position:fixed;inset:-40px;background:
-  linear-gradient(rgba(110,240,255,.05) 1px,transparent 1px),
-  linear-gradient(90deg,rgb(110,240,255,.04) 1px,transparent 1px);
-background-size:44px 44px,44px 44px;
-transform:perspective(700px) rotateX(55deg) translateY(-140px);filter:blur(.2px);
-opacity:.35;pointer-events:none;animation:drift 12s linear infinite;}
-@keyframes drift{from{background-position:0 0,0 0}to{background-position:0 176px,176px 0}}
-body::after{content:"";position:fixed;inset:0;background:
-  repeating-linear-gradient(to bottom,#fff8,.028 1px,transparent 1px,transparent 6px);
-opacity:.10;mix-blend-mode:overlay;pointer-events:none;}
-
-/* --------------------- 2️⃣ Layout ------------------------------------------- */
-.wrap{
-  width:100%;max-width:1040px;
-  padding:28px;
-  text-align:center;
+/* Base Styles & Grid */
+.wrap{width:min(1040px,100%); text-align:center;}
+h1{
+  margin: 0 0 16px;
+  font-size: clamp(30px, 4.4vw, 52px);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  font-weight: 800;
+  text-shadow: 0 0 18px rgba(110,240,255,0.18);
 }
 
-.topbar{display:flex;gap:24px;margin-bottom:24px;padding:16px;background-color:var(--bg1);
-  border-radius:28px;box-shadow:0 18px 60px rgba(0,0,0,.55),0 0 0 1px rgba(180,120,255,.10) inset;}
-.pill{display:flex;align-items:center;justify-content:center;padding:16px;background-color:var(--bg1);
-  border-radius:28px;border:1px solid var(--border);font-size:16px;color:var(--text);}
-.pill:first-child{flex:1;} /* title pill takes remaining space */
-
-/* circle pills – real buttons */
-.circle{
-  width:8px;height:8px;border-radius:50%;margin:0 4px;
-  cursor:pointer;transition:.2s;display:flex;align-items:center;justify-content:center;}
-.circle.outline{background:none;border:1px solid var(--border);}
-.circle.filled{background:var(--border);border:none;}
-.circle.active{box-shadow:0 0 6px var(--border);}
-.circle.outline.active{background:var(--border);}
-
-/* card – now responsive */
 .card{
-  display:flex;flex-wrap:wrap;
-  gap:24px;padding:24px;background-color:var(--bg1);
-  border-radius:28px;box-shadow:0 18px 60px rgba(0,0,0,.55),0 0 0 1px rgba(180,120,255,.10) inset;
-  justify-content:center;
+  background: linear-gradient(180deg, rgba(10,16,26,0.78), rgba(7,10,16,0.72));
+  border: 1px solid rgba(110,240,255,0.18);
+  border-radius: 18px;
+  box-shadow: 0 18px 60px rgba(0,0,0,0.55), 0 0 0 1px rgba(180,120,255,0.10) inset;
+  padding: 18px;
+  text-align:left;
+  position:relative;
 }
 
-/* StarScope – fixed 640×360 px */
-.star-scope{
-  width:640px;height:360px;position:relative;background-color:var(--bg1);
+/* Top Bar Pills */
+.topbar{
+  display:flex; gap:12px; flex-wrap:wrap;
+  align-items:stretch; justify-content:space-between;
+  margin-bottom:12px;
 }
-.star-scope img{width:100%;height:100%;object-fit:contain;}
-.pill-bottom{position:absolute;bottom:0;left:0;right:0;padding:8px 16px;
-  background:#fff4;border-radius:0 0 28px 28px;backdrop-filter:blur(10px);
-  display:flex;justify-content:center;}
-
-/* NavCom panel – fixed 360×360 px */
-.navcom-panel{
-  width:360px;height:360px;background-color:var(--bg1);position:relative;
+.pill{
+  flex:1 1 280px;
+  background: linear-gradient(180deg, rgba(10,16,26,0.70), rgba(8,12,20,0.62));
+  border: 1px solid rgba(110,240,255,0.16);
+  border-radius: 16px;
+  padding: 12px 14px;
+  min-height: 72px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  box-shadow: 0 0 0 1px rgba(180,120,255,0.08) inset;
 }
-.navcom-panel img{width:100%;height:100%;object-fit:contain;}
-.pill-a{position:absolute;bottom:0;left:0;right:0;padding:8px 16px;
-  background:#fff4;border-radius:0 0 28px 28px;backdrop-filter:blur(10px);
-  display:flex;justify-content:center;}
+.sub{ color: var(--muted); font-size: 13px; margin-top:4px; }
+.strong-title { display:block; font-weight:700; color:var(--text); letter-spacing:.05em; }
 
-/* buttons */
-.btn{
-  padding:8px 16px;font-size:14px;color:var(--text);background-color:var(--good);
-  border:none;border-radius:8px;margin:0 4px;cursor:pointer;transition:.2s;
+/* Stability Circles */
+.circles-container {
+    display: flex;
+    gap: 12px;
 }
-.btn-no{background-color:var(--bad);}
-.clicked{opacity:.7 !important;filter:brightness(.95) saturate(1.1);}
+.circle {
+    width: 24px;
+    height: 24px;
+    border: 2px solid var(--cyan);
+    border-radius: 50%;
+    background: transparent;
+    box-shadow: 0 0 8px rgba(110,240,255,0.2);
+    transition: all 0.4s ease;
+}
+.circle.lit {
+    background: var(--cyan);
+    box-shadow: 0 0 18px var(--cyan);
+    border-color: #fff;
+}
 
-/* --------------------- 3️⃣ Responsive tweaks -------------------------------- */
-@media(max-width:800px){
-  .card{flex-direction:column;align-items:center;}
-  /* On narrow screens the panels will stack vertically */
+/* Main Grid Areas */
+.grid{
+  display:grid; grid-template-columns: 1fr 1fr; gap:12px;
+  position:relative; z-index:1;
+}
+@media (max-width: 800px){ .grid{grid-template-columns:1fr;} }
+
+.panel{
+  background: linear-gradient(180deg, rgba(10,16,26,0.72), rgba(8,12,20,0.64));
+  border: 1px solid rgba(110,240,255,0.15);
+  border-radius: 18px;
+  padding: 14px;
+  display:flex; flex-direction:column;
+}
+
+.label{
+  font-size: 12px; letter-spacing:.22em; text-transform:uppercase;
+  color: rgba(235,250,255,0.70); margin:0 0 10px;
+}
+
+/* Image Containers (Scope & Archive) */
+.display-window {
+  border: 1px solid rgba(110,240,255,0.16);
+  border-radius: 16px;
+  background: radial-gradient(circle at center, rgba(110,240,255,0.05), transparent 70%);
+  height: 400px;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  box-shadow: inset 0 0 30px rgba(0,0,0,0.5);
+}
+
+.display-window img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain; /* Keeps 1080x1920 ratio inside box */
+    opacity: 0.9;
+    mix-blend-mode: screen;
+}
+
+/* Buttons */
+button{
+  border: 1px solid rgba(110,240,255,0.18);
+  background: linear-gradient(180deg, rgba(18,28,44,0.75), rgba(8,12,20,0.70));
+  color: var(--text);
+  padding: 10px 18px;
+  border-radius: 999px;
+  cursor:pointer;
+  font-weight: 750;
+  text-transform: uppercase;
+  font-size: 12px;
+  transition: all .2s ease;
+  box-shadow: 0 0 0 1px rgba(180,120,255,0.06) inset;
+}
+button:hover{ filter: brightness(1.2); border-color:var(--cyan); }
+button:active{ transform: scale(.96); }
+
+/* Specific Button Styles */
+.btn-gen { 
+    background: rgba(110,240,255,0.1); 
+    width: 100%; 
+    margin-top: 10px;
+}
+.btn-row {
+    display: flex; gap: 10px; margin-top: 12px;
+}
+.btn-match { flex: 1; border-color: var(--good); color: var(--good); }
+.btn-no-match { flex: 1; border-color: var(--bad); color: var(--bad); }
+
+.btn-encode {
+    background: var(--purple);
+    color: #000;
+    border: 1px solid #fff;
+    box-shadow: 0 0 20px var(--purple);
+    animation: pulse 2s infinite;
+}
+
+/* Text Feedback Styles */
+#feedbackMsg { font-weight: bold; color: var(--cyan); }
+.hex-display {
+    font-family: ui-monospace, monospace;
+    font-size: 18px;
+    color: var(--good);
+    margin-top: 8px;
+    letter-spacing: 0.1em;
+}
+
+@keyframes pulse { 50% { box-shadow: 0 0 5px var(--purple); } }
+
+.footerNote{
+  margin-top:10px; font-size:12px; color: rgba(235,250,255,0.55);
+  text-align:center; letter-spacing:.08em; text-transform: uppercase;
 }
 </style>
 </head>
 
-<body>
-<div class="wrap">
-  <!-- Topbar -->
+<body> 
+<div class="wrap"> 
+<h1>Padua Redemption</h1>
+
+<div class="card">
   <div class="topbar">
-    <div class="pill">NavData Computation</div>
-    <div class="pill" id="outline-pills"><!-- outline circles -->
-      <button type="button" class="circle outline"></button>
-      <button type="button" class="circle outline"></button>
-      <button type="button" class="circle outline"></button>
-    </div>
-    <div class="pill" id="filled-pills"><!-- filled circles -->
-      <button type="button" class="circle filled"></button>
-      <button type="button" class="circle filled"></button>
-      <button type="button" class="circle filled"></button>
-    </div>
-  </div>
-
-  <!-- Main card -->
-  <div class="card">
-    <!-- StarScope panel -->
-    <div class="star-scope">
-      <img id="starscope-img" src="" alt="StarScope image"/>
-      <div class="pill-bottom"><button id="generate-btn" class="btn">Generate New</button></div>
-    </div>
-
-    <!-- NavCom panel -->
-    <div class="navcom-panel">
-      <img id="a-image" src="" alt="A image"/>
-      <div class="pill-a">
-        <button id="match-btn" class="btn">Match</button>
-        <button id="no-match-btn" class="btn btn-no">No Match</button>
+    <div class="pill">
+      <div>
+        <span class="strong-title">Nav Computation</span>
+        <div class="sub">Match star formations to sensor</div>
       </div>
     </div>
+
+    <div class="pill">
+      <div>
+        <span class="strong-title">Stability Window</span>
+        <div class="sub">Lock signal integrity</div>
+      </div>
+      <div class="circles-container">
+          <div class="circle" id="c1"></div>
+          <div class="circle" id="c2"></div>
+          <div class="circle" id="c3"></div>
+      </div>
+    </div>
+
+    <div class="pill">
+      <div>
+        <span class="strong-title">System Feedback</span>
+        <div class="sub" id="feedbackMsg">Awaiting Input...</div>
+        <div id="hexResult" class="hex-display"></div>
+      </div>
+      <div id="actionArea">
+         </div>
+    </div>
   </div>
+
+  <div class="grid">
+    
+    <div class="panel">
+      <div class="label">Optical Sensor Display</div>
+      <div class="display-window" id="scopeWrap">
+        <img id="imgQ" src="" alt="No Signal" style="display:none;">
+      </div>
+      
+      <button class="btn-gen" id="btnGen">Generate New Sensor Data</button>
+    </div>
+
+    <div class="panel">
+      <div class="label">NavLog Archive</div>
+      <div class="display-window">
+        <img id="imgA" src="" alt="No Data" style="display:none;">
+      </div>
+
+      <div class="btn-row" id="controls">
+        <button class="btn-match" id="btnMatch">Match Confirmed</button>
+        <button class="btn-no-match" id="btnNoMatch">No Match</button>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footerNote">Padua Deep-Space Array • Xeno-Signal Stabilization Module</div>
 </div>
+</div> 
 
 <script>
-/* --------------------------------- Utility ---------------------------------- */
-const loadTextFile = url => fetch(url).then(r=>r.text()).catch(e=>{
-  console.error('load error',url,e);return '';});
+/**
+ * PADUA REDEMPTION: NAV COMP LOGIC
+ */
 
-/* -------------------------- Load image lists ------------------------------- */
-let qPaths=[], aPaths=[];
-Promise.all([loadTextFile('Q.txt'), loadTextFile('A.txt')]).then(([q,a])=>{
-  qPaths = q.split('\n').filter(p=>p.trim());
-  aPaths = a.split('\n').filter(p=>p.trim());
-  if(qPaths.length) displayImage(qPaths);
-  if(aPaths.length) displayAImage(aPaths);
+// State
+let score = 0; // 0 to 3
+let qFiles = [];
+let aFiles = [];
+let currentQ = "";
+let currentA = "";
+let isGameActive = true;
+
+// DOM Elements
+const elImgQ = document.getElementById('imgQ');
+const elImgA = document.getElementById('imgA');
+const elFeedback = document.getElementById('feedbackMsg');
+const elHex = document.getElementById('hexResult');
+const elActionArea = document.getElementById('actionArea');
+const circles = [
+    document.getElementById('c1'),
+    document.getElementById('c2'),
+    document.getElementById('c3')
+];
+
+// --- Initialization ---
+
+async function init() {
+    try {
+        // Attempt to fetch file lists
+        const qRes = await fetch('Q.txt');
+        const aRes = await fetch('A.txt');
+
+        if(qRes.ok && aRes.ok) {
+            const qText = await qRes.text();
+            const aText = await aRes.text();
+            // Split by newlines and filter empty strings
+            qFiles = qText.split('\n').map(s => s.trim()).filter(s => s);
+            aFiles = aText.split('\n').map(s => s.trim()).filter(s => s);
+        } else {
+            throw new Error("Files not found");
+        }
+    } catch (e) {
+        console.warn("Using fallback mock data (Text files not found)");
+        // MOCK DATA for standalone testing
+        qFiles = ["sensor_alpha(1).png", "sensor_beta(2).png", "sensor_gamma(3).png", "sensor_delta(4).png"];
+        aFiles = ["archive_old(1).jpg", "archive_ref(2).jpg", "archive_bad(5).jpg", "archive_deep(3).jpg"];
+    }
+
+    // Start first round
+    loadRound(true);
+}
+
+// --- Logic ---
+
+// Extracts number from filename, e.g., "star(4).png" -> 4
+function getID(filename) {
+    if(!filename) return -999;
+    const match = filename.match(/\((\d+)\)/);
+    return match ? parseInt(match[1]) : -1;
+}
+
+function loadRound(fullSwap = true) {
+    if(!isGameActive) return;
+
+    if (qFiles.length === 0 || aFiles.length === 0) {
+        elFeedback.textContent = "ERR: Database Empty";
+        return;
+    }
+
+    // Swap Q Image
+    if(fullSwap) {
+        const randQ = Math.floor(Math.random() * qFiles.length);
+        currentQ = qFiles[randQ];
+        elImgQ.src = currentQ; // In real repo, might need path prefix
+        elImgQ.style.display = "block";
+        
+        // Mocking image src for test if file doesn't exist
+        elImgQ.onerror = () => { elImgQ.src = "https://placehold.co/1080x1920/000000/113344?text=" + currentQ; };
+    }
+
+    // Swap A Image (NavLog)
+    // 30% chance to force a match if available, to make game playable
+    let pickedA;
+    const targetID = getID(currentQ);
+    const matchingA = aFiles.find(f => getID(f) === targetID);
+
+    if (matchingA && Math.random() < 0.35) {
+        pickedA = matchingA;
+    } else {
+        pickedA = aFiles[Math.floor(Math.random() * aFiles.length)];
+    }
+
+    currentA = pickedA;
+    elImgA.src = currentA;
+    elImgA.style.display = "block";
+    elImgA.onerror = () => { elImgA.src = "https://placehold.co/1080x1920/001122/443355?text=" + currentA; };
+
+    elFeedback.textContent = "Awaiting Correlation...";
+    elFeedback.style.color = "var(--cyan)";
+}
+
+// Update the stability circles
+function updateScore(change) {
+    if(!isGameActive) return;
+
+    let prevScore = score;
+    score += change;
+    if (score < 0) score = 0;
+    if (score > 3) score = 3;
+
+    // Visual Update
+    circles.forEach((c, i) => {
+        if (i < score) c.classList.add('lit');
+        else c.classList.remove('lit');
+    });
+
+    // Win Condition
+    if (score === 3 && prevScore !== 3) {
+        triggerWin();
+    }
+}
+
+function triggerWin() {
+    isGameActive = false;
+    elFeedback.textContent = "STABILIZATION COMPLETE";
+    elFeedback.style.color = "var(--good)";
+    
+    // Create Encode Button
+    const btn = document.createElement('button');
+    btn.className = "btn-encode";
+    btn.textContent = "ENCODE SEQUENCE";
+    btn.onclick = generateHex;
+    elActionArea.appendChild(btn);
+
+    // Disable game controls
+    document.getElementById('btnGen').disabled = true;
+    document.getElementById('btnMatch').disabled = true;
+    document.getElementById('btnNoMatch').disabled = true;
+}
+
+// Generate 3 Hex numbers summing to 27 (0x1B)
+function generateHex() {
+    const target = 27;
+    
+    // Random math logic to ensure sum is 27
+    // Ensure numbers aren't negative.
+    // Try to avoid 0 for aesthetics, but 0 is allowed.
+    let n1 = Math.floor(Math.random() * 20) + 1; // 1 to 20
+    let rem = target - n1;
+    
+    // Safety check
+    if(rem < 1) { n1 = 15; rem = 12; }
+
+    let n2 = Math.floor(Math.random() * (rem - 1)) + 1;
+    let n3 = target - n1 - n2;
+
+    const h1 = "0x" + n1.toString(16).toUpperCase();
+    const h2 = "0x" + n2.toString(16).toUpperCase();
+    const h3 = "0x" + n3.toString(16).toUpperCase();
+
+    elHex.innerHTML = `${h1} &nbsp; ${h2} &nbsp; ${h3}`;
+    elActionArea.innerHTML = ""; // Remove button
+    elFeedback.textContent = "COORDINATES LOCKED";
+}
+
+// --- Event Listeners ---
+
+document.getElementById('btnGen').addEventListener('click', () => {
+    // Only swaps Q, keeps A (or logic could swap both, but user asked to swap "the image" being displayed)
+    // To make it easier to find matches, let's just re-roll Q
+    loadRound(true); 
 });
 
-/* --------------------------- Display helpers -------------------------------- */
-function randomFrom(arr){return arr[Math.floor(Math.random()*arr.length)]}
-function displayImage(paths){
-  const img=document.getElementById('starscope-img');
-  if(img) img.src=randomFrom(paths);
-}
-function displayAImage(paths){
-  const img=document.getElementById('a-image');
-  if(img) img.src=randomFrom(paths);
-}
+document.getElementById('btnMatch').addEventListener('click', () => {
+    if(!isGameActive) return;
+    
+    const idQ = getID(currentQ);
+    const idA = getID(currentA);
 
-/* ---------------------------- Button events --------------------------------- */
-document.getElementById('generate-btn').addEventListener('click',()=>displayImage(qPaths));
-
-['match','no-match'].forEach(id=>{
-  const btn=document.getElementById(`${id}-btn`);
-  if(btn){
-    btn.addEventListener('click',e=>{
-      e.currentTarget.classList.add('clicked');
-      setTimeout(()=>e.currentTarget.classList.remove('clicked'),200);
-      console.log(`Button ${id} pressed`);
-    });
-  }
+    if (idQ !== -1 && idQ === idA) {
+        // Correct Match
+        elFeedback.textContent = "MATCH CONFIRMED (+1)";
+        elFeedback.style.color = "var(--good)";
+        updateScore(1);
+        setTimeout(() => { if(isGameActive) loadRound(true); }, 800);
+    } else {
+        // Incorrect Match
+        elFeedback.textContent = "MISMATCH DETECTED (-1)";
+        elFeedback.style.color = "var(--bad)";
+        updateScore(-1);
+        setTimeout(() => { if(isGameActive) loadRound(true); }, 800);
+    }
 });
 
-/* --------------------------- Circle pill toggles ---------------------------- */
-function initCirclePill(pillId,type){
-  const container=document.getElementById(pillId);
-  if(!container) return;
-  const circles=container.querySelectorAll('.circle');
-  circles.forEach((btn,i)=>{
-    btn.dataset.idx=i; // handy for debugging
-    btn.addEventListener('click',e=>{
-      e.currentTarget.classList.toggle('active');
-      console.log(`Circle (${type}) ${i} toggled`,e.currentTarget.classList.contains('active'));
-      /* uncomment to make only one active at a time:
-        circles.forEach(c=>c!==btn && c.classList.remove('active')); */
-    });
-  });
-}
-initCirclePill('outline-pills','outline');
-initCirclePill('filled-pills','filled');
+document.getElementById('btnNoMatch').addEventListener('click', () => {
+    if(!isGameActive) return;
+
+    const idQ = getID(currentQ);
+    const idA = getID(currentA);
+    
+    // User says "No Match". 
+    if (idQ !== -1 && idQ === idA) {
+        // User was WRONG (There WAS a match)
+        elFeedback.textContent = "ERROR: PATTERN IGNORED (-1)";
+        elFeedback.style.color = "var(--bad)";
+        updateScore(-1);
+    } else {
+        // User was RIGHT (There was NO match)
+        elFeedback.textContent = "SCANNING...";
+        // No points, just continue
+    }
+    
+    // In both cases, swap out for random others
+    setTimeout(() => { if(isGameActive) loadRound(true); }, 500);
+});
+
+// Run
+init();
 
 </script>
 </body>

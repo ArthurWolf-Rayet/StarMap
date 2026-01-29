@@ -79,7 +79,7 @@ h1{
 .triangle-wrap {
     position: relative;
     width: 60px;
-    height: 52px; /* Equilateral-ish aspect */
+    height: 52px; 
     margin-right: 10px;
 }
 
@@ -110,7 +110,7 @@ h1{
     position: absolute;
     background: var(--cyan);
     height: 2px;
-    opacity: 0; /* Hidden by default */
+    opacity: 0;
     transform-origin: top left;
     transition: opacity 0.5s ease;
     z-index: 1;
@@ -118,12 +118,9 @@ h1{
 }
 .line.show { opacity: 1; }
 
-/* Line Geometry (Hardcoded for 60x52 box) */
-/* Top to Right */
+/* Line Geometry */
 .l-1 { width: 34px; top: 7px; left: 30px; transform: rotate(60deg); }
-/* Right to Left */
-.l-2 { width: 44px; top: 48px; left: 47px; transform: rotate(180deg); } /* Bottom flat */
-/* Left to Top */
+.l-2 { width: 44px; top: 48px; left: 47px; transform: rotate(180deg); } 
 .l-3 { width: 34px; top: 45px; left: 6px; transform: rotate(300deg); }
 
 /* Main Grid */
@@ -165,7 +162,7 @@ h1{
     mix-blend-mode: screen;
 }
 
-/* Focus Animation for Slewing */
+/* Focus Animation for Slewing (Optical) */
 @keyframes mechanicalFocus {
   0% { filter: blur(0px) brightness(1); transform: scale(1); }
   20% { filter: blur(6px) brightness(1.5); transform: scale(1.02); }
@@ -173,9 +170,16 @@ h1{
   60% { filter: blur(4px) brightness(1.2); }
   100% { filter: blur(0px) brightness(1); transform: scale(1); }
 }
-.re-focus img {
-    animation: mechanicalFocus 0.8s steps(5, end);
+.re-focus img { animation: mechanicalFocus 0.8s steps(5, end); }
+
+/* Scan Animation for Archive */
+@keyframes scanGlitch {
+  0% { opacity: 0.5; transform: translateY(-5px); }
+  50% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0.9; }
 }
+.re-scan img { animation: scanGlitch 0.3s ease-out; }
+
 
 /* Buttons */
 button{
@@ -239,7 +243,11 @@ button:active{ transform: scale(.96); }
         <div class="sub">Direction Finding Accuracy</div>
       </div>
       <div class="triangle-wrap">
-          <div class="line l-1" id="line1"></div> <div class="line l-2" id="line2"></div> <div class="line l-3" id="line3"></div> <div class="circle c-top" id="c1"></div>
+          <div class="line l-1" id="line1"></div> 
+          <div class="line l-2" id="line2"></div> 
+          <div class="line l-3" id="line3"></div> 
+          
+          <div class="circle c-top" id="c1"></div>
           <div class="circle c-right" id="c2"></div>
           <div class="circle c-left" id="c3"></div>
       </div>
@@ -267,7 +275,7 @@ button:active{ transform: scale(.96); }
 
     <div class="panel">
       <div class="label">NavLog Archive</div>
-      <div class="display-window">
+      <div class="display-window" id="archiveWrap">
         <img id="imgA" src="" alt="No Data" style="display:none;">
       </div>
       <div class="btn-row" id="controls">
@@ -288,7 +296,7 @@ button:active{ transform: scale(.96); }
  */
 
 // State
-let score = 0; // 0 to 3
+let score = 0; 
 let qFiles = [];
 let aFiles = [];
 let currentQ = "";
@@ -297,23 +305,15 @@ let isGameActive = true;
 
 // DOM Elements
 const elImgQ = document.getElementById('imgQ');
-const elScope = document.getElementById('scopeWrap'); // Wrapper for animation
+const elScope = document.getElementById('scopeWrap'); 
 const elImgA = document.getElementById('imgA');
+const elArchive = document.getElementById('archiveWrap');
 const elFeedback = document.getElementById('feedbackMsg');
 const elHex = document.getElementById('hexResult');
 const elActionArea = document.getElementById('actionArea');
 
-// Triangulation Nodes and Lines
-const nodes = [
-    document.getElementById('c1'),
-    document.getElementById('c2'),
-    document.getElementById('c3')
-];
-const lines = [
-    document.getElementById('line1'),
-    document.getElementById('line2'),
-    document.getElementById('line3')
-];
+const nodes = [document.getElementById('c1'), document.getElementById('c2'), document.getElementById('c3')];
+const lines = [document.getElementById('line1'), document.getElementById('line2'), document.getElementById('line3')];
 
 // --- Initialization ---
 async function init() {
@@ -331,58 +331,70 @@ async function init() {
         qFiles = ["star(1).png", "star(2).png", "star(3).png", "star(4).png"];
         aFiles = ["nav(1).jpg", "nav(2).jpg", "nav(9).jpg", "nav(3).jpg"];
     }
-    // Initial Load
-    updateImages(true); 
+    // Start with a full random set
+    updateImages('BOTH'); 
 }
 
-// Helper: Extract ID from filename "name(5).ext" -> 5
 function getID(filename) {
     if(!filename) return -999;
     const match = filename.match(/\((\d+)\)/);
     return match ? parseInt(match[1]) : -1;
 }
 
-// Logic: Update Images
-// refreshQ: If true, changes the Optical Sensor (Slew). If false, keeps Q, changes A (Search).
-function updateImages(refreshQ = false) {
+/**
+ * Update Images Logic
+ * mode = 'BOTH':   Changes Q AND A. (Used for Match Confirmed / Init)
+ * mode = 'Q_ONLY': Changes Q only. Keeps A. (Used for Slew)
+ * mode = 'A_ONLY': Changes A only. Keeps Q. (Used for No Match)
+ */
+function updateImages(mode) {
     if(!isGameActive) return;
-
     if (qFiles.length === 0 || aFiles.length === 0) return;
 
-    // 1. Update Optical Sensor (Q) if requested
-    if(refreshQ) {
+    // 1. Update Optical Sensor (Q)
+    // Only if mode is BOTH or Q_ONLY
+    if(mode === 'BOTH' || mode === 'Q_ONLY') {
         const randQ = Math.floor(Math.random() * qFiles.length);
         currentQ = qFiles[randQ];
         elImgQ.src = currentQ;
         elImgQ.style.display = "block";
         
-        // Trigger Focus Animation
+        // Focus Animation for Optical
         elScope.classList.remove('re-focus');
-        void elScope.offsetWidth; // Trigger reflow
+        void elScope.offsetWidth; 
         elScope.classList.add('re-focus');
 
-        // Mock fallback
         elImgQ.onerror = () => { elImgQ.src = "https://placehold.co/1080x1920/000000/113344?text=" + currentQ; };
     }
 
-    // 2. Always Update NavLog (A) to allow searching
-    // 25% chance to show the correct match (if it exists in DB)
-    const targetID = getID(currentQ);
-    const matchingA = aFiles.find(f => getID(f) === targetID);
-    
-    let pickedA;
-    if (matchingA && Math.random() < 0.25) {
-        pickedA = matchingA;
-    } else {
-        pickedA = aFiles[Math.floor(Math.random() * aFiles.length)];
-    }
+    // 2. Update NavLog (A)
+    // Only if mode is BOTH or A_ONLY
+    if(mode === 'BOTH' || mode === 'A_ONLY') {
+        // 25% chance to force a match if one exists
+        const targetID = getID(currentQ);
+        const matchingA = aFiles.find(f => getID(f) === targetID);
+        
+        let pickedA;
+        // Randomly decide if we show the match (if available) or random junk
+        if (matchingA && Math.random() < 0.25) {
+            pickedA = matchingA;
+        } else {
+            pickedA = aFiles[Math.floor(Math.random() * aFiles.length)];
+        }
 
-    currentA = pickedA;
-    elImgA.src = currentA;
-    elImgA.style.display = "block";
-    elImgA.onerror = () => { elImgA.src = "https://placehold.co/1080x1920/001122/443355?text=" + currentA; };
+        currentA = pickedA;
+        elImgA.src = currentA;
+        elImgA.style.display = "block";
+        
+        // Scan Animation for Archive
+        elArchive.classList.remove('re-scan');
+        void elArchive.offsetWidth; 
+        elArchive.classList.add('re-scan');
+
+        elImgA.onerror = () => { elImgA.src = "https://placehold.co/1080x1920/001122/443355?text=" + currentA; };
+    }
     
-    // Reset Feedback text color
+    // Reset Text Color
     elFeedback.style.color = "var(--cyan)";
 }
 
@@ -395,19 +407,15 @@ function updateScore(change) {
     if (score < 0) score = 0;
     if (score > 3) score = 3;
 
-    // Visuals: Nodes
     nodes.forEach((n, i) => {
         if(i < score) n.classList.add('lit');
         else n.classList.remove('lit');
     });
 
-    // Visuals: Lines (Connect previous to current)
-    // Score 2: Connect 1-2. Score 3: Connect 2-3 and 3-1 (Complete)
-    lines[0].classList.toggle('show', score >= 2); // Line 1-2
-    lines[1].classList.toggle('show', score >= 3); // Line 2-3
-    lines[2].classList.toggle('show', score >= 3); // Line 3-1 (Complete Triangle)
+    lines[0].classList.toggle('show', score >= 2); 
+    lines[1].classList.toggle('show', score >= 3); 
+    lines[2].classList.toggle('show', score >= 3); 
 
-    // Win State
     if (score === 3 && prevScore !== 3) {
         triggerWin();
     }
@@ -424,7 +432,6 @@ function triggerWin() {
     btn.onclick = generateHex;
     elActionArea.appendChild(btn);
 
-    // Disable controls
     document.getElementById('btnGen').disabled = true;
     document.getElementById('btnMatch').disabled = true;
     document.getElementById('btnNoMatch').disabled = true;
@@ -449,13 +456,13 @@ function generateHex() {
 
 // --- Event Listeners ---
 
-// SLEW: Changes Q (Sensor) and A (Archive)
+// SLEW: Changes Q only. Keeps A the same.
 document.getElementById('btnGen').addEventListener('click', () => {
-    elFeedback.textContent = "Slewing...";
-    updateImages(true); 
+    elFeedback.textContent = "Slewing Sensor Array...";
+    updateImages('Q_ONLY'); 
 });
 
-// MATCH: Checks logic, keeps Q, cycles A
+// MATCH: Checks match, then swaps BOTH images
 document.getElementById('btnMatch').addEventListener('click', () => {
     if(!isGameActive) return;
     
@@ -471,30 +478,30 @@ document.getElementById('btnMatch').addEventListener('click', () => {
         elFeedback.style.color = "var(--bad)";
         updateScore(-1);
     }
-    // Only cycle Archive image
-    setTimeout(() => { if(isGameActive) updateImages(false); }, 500);
+    
+    // Swap BOTH images (New Round)
+    setTimeout(() => { if(isGameActive) updateImages('BOTH'); }, 500);
 });
 
-// NO MATCH: Checks logic, keeps Q, cycles A
+// NO MATCH: Checks logic, then swaps A ONLY (Search)
 document.getElementById('btnNoMatch').addEventListener('click', () => {
     if(!isGameActive) return;
 
     const idQ = getID(currentQ);
     const idA = getID(currentA);
     
-    // User says "No Match"
     if (idQ !== -1 && idQ === idA) {
-        // User is WRONG (There WAS a match)
+        // User said No Match, but there WAS a match
         elFeedback.textContent = "ERROR: IGNORED MATCH (-1)";
         elFeedback.style.color = "var(--bad)";
         updateScore(-1);
     } else {
-        // User is RIGHT
+        // User was correct
         elFeedback.textContent = "Scanning Archive...";
     }
     
-    // Only cycle Archive image
-    setTimeout(() => { if(isGameActive) updateImages(false); }, 200);
+    // Swap A ONLY (Search Archive)
+    setTimeout(() => { if(isGameActive) updateImages('A_ONLY'); }, 200);
 });
 
 init();

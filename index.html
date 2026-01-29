@@ -3,79 +3,122 @@
 <head>
 <meta charset="utf-8" />
 <title>Padua Redemption – NavData Computation</title>
-<style>
-:root {
-  /* Sci‑fi palette */
-  --bg0: #05070c;
-  --bg1: #070b12;
-  --panel: rgba(10,16,26,.72);
-  --border: rgba(110,240,255,.22);
-  --text: rgba(235,250,255,.92);
-  --good: rgba(120,255,200,.95);
-  --bad: rgba(255,120,140,.95);
-}
-*{box-sizing:border-box;}
-html,body{height:100%;margin:0;display:grid;place-items:center;padding:28px;color:var(--text);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:
-  radial-gradient(1200px 700px at 20% 15%,rgba(110,240,255,.12),transparent 55%),
-  radial-gradient(1000px 650px at 80% 30%,rgba(180,120,255,.10),transparent 60%),
-  linear-gradient(180deg,var(--bg0),var(--bg1));
-overflow-x:hidden;}
-/* Animated grid glow */
-body::before{content:"";position:fixed;inset:-40px;background:
-    linear-gradient(rgba(110,240,255,.05) 1px,transparent 1px),
-    linear-gradient(90deg,rgb(110,240,255,.04) 1px,transparent 1px);
-background-size:44px 44px,44px 44px;transform:perspective(700px) rotateX(55deg) translateY(-140px);filter:blur(.2px);opacity:.35;pointer-events:none;animation:drift 12s linear infinite;}
-@keyframes drift{from{background-position:0 0,0 0}to{background-position:0 176px,176px 0}}
-/* Scanlines */
-body::after{content:"";position:fixed;inset:0;background:repeating-linear-gradient(to bottom,#fff8,.028 1px,transparent 1px,transparent 6px);opacity:.10;mix-blend-mode:overlay;pointer-events:none;}
-.wrap{max-width:1040px;width:100%;text-align:center;}
-/* Topbar */
-.topbar{display:flex;gap:24px;margin-bottom:24px;padding:16px;background-color:var(--bg1);border-radius:28px;
-  box-shadow:0 18px 60px rgba(0,0,0,.55),0 0 0 1px rgba(180,120,255,.10) inset;}
-.pill{display:flex;align-items:center;justify-content:center;padding:16px;background-color:var(--bg1);border-radius:28px;border:1px solid var(--border);}
-.pill:first-child{flex:1;font-size:16px;color:var(--text);} /* title pill */
 
-/* Circle button style – outline */
-.circle.outline{
-  width:8px;height:8px;border-radius:50%;background:none;border:1px solid var(--border);
-  margin:0 4px;cursor:pointer;transition:.2s;
+<style>
+/* --------------------- 1️⃣ Palette & Basics -------------------------------- */
+:root {
+  --bg0:#05070c;     /* deep dark */
+  --bg1:#070b12;
+  --border:rgba(110,240,255,.22);
+  --text:rgba(235,250,255,.92);
+  --good:rgba(120,255,200,.95);
+  --bad:rgba(255,120,140,.95);
 }
-.circle.filled{
-  width:8px;height:8px;border-radius:50%;background:var(--border);margin:0 4px;cursor:pointer;transition:.2s;
+*,*::before,*::after{box-sizing:border-box;}
+html,body{
+  height:100%;margin:0;
+  display:grid;place-items:center;
+  background:
+    radial-gradient(1200px 700px at 20% 15%,rgba(110,240,255,.12),transparent 55%),
+    radial-gradient(1000px 650px at 80% 30%,rgba(180,120,255,.10),transparent 60%),
+    linear-gradient(180deg,var(--bg0),var(--bg1));
+  overflow-x:hidden;
 }
-/* Active state */
+
+/* animated background & scanlines – unchanged */
+body::before{content:"";position:fixed;inset:-40px;background:
+  linear-gradient(rgba(110,240,255,.05) 1px,transparent 1px),
+  linear-gradient(90deg,rgb(110,240,255,.04) 1px,transparent 1px);
+background-size:44px 44px,44px 44px;
+transform:perspective(700px) rotateX(55deg) translateY(-140px);filter:blur(.2px);
+opacity:.35;pointer-events:none;animation:drift 12s linear infinite;}
+@keyframes drift{from{background-position:0 0,0 0}to{background-position:0 176px,176px 0}}
+body::after{content:"";position:fixed;inset:0;background:
+  repeating-linear-gradient(to bottom,#fff8,.028 1px,transparent 1px,transparent 6px);
+opacity:.10;mix-blend-mode:overlay;pointer-events:none;}
+
+/* --------------------- 2️⃣ Layout ------------------------------------------- */
+.wrap{
+  width:100%;max-width:1040px;
+  padding:28px;
+  text-align:center;
+}
+
+.topbar{display:flex;gap:24px;margin-bottom:24px;padding:16px;background-color:var(--bg1);
+  border-radius:28px;box-shadow:0 18px 60px rgba(0,0,0,.55),0 0 0 1px rgba(180,120,255,.10) inset;}
+.pill{display:flex;align-items:center;justify-content:center;padding:16px;background-color:var(--bg1);
+  border-radius:28px;border:1px solid var(--border);font-size:16px;color:var(--text);}
+.pill:first-child{flex:1;} /* title pill takes remaining space */
+
+/* circle pills – real buttons */
+.circle{
+  width:8px;height:8px;border-radius:50%;margin:0 4px;
+  cursor:pointer;transition:.2s;display:flex;align-items:center;justify-content:center;}
+.circle.outline{background:none;border:1px solid var(--border);}
+.circle.filled{background:var(--border);border:none;}
 .circle.active{box-shadow:0 0 6px var(--border);}
 .circle.outline.active{background:var(--border);}
 
-/* Main card */
-.card{display:flex;gap:24px;padding:24px;background-color:var(--bg1);border-radius:28px;
-      box-shadow:0 18px 60px rgba(0,0,0,.55),0 0 0 1px rgba(180,120,255,.10) inset;width:max-content;}
-.star-scope{flex:1;position:relative;background-color:var(--bg1);overflow:hidden;}
-.star-scope img{width:100%;height:100%;object-fit:contain;}
+/* card – now responsive */
+.card{
+  display:flex;flex-wrap:wrap;
+  gap:24px;padding:24px;background-color:var(--bg1);
+  border-radius:28px;box-shadow:0 18px 60px rgba(0,0,0,.55),0 0 0 1px rgba(180,120,255,.10) inset;
+  justify-content:center;
+}
+
+/* StarScope – 16:9 ratio, flexible width */
+.star-scope{
+  flex:1 1 0;position:relative;background-color:var(--bg1);
+  max-width:calc(100% - 360px - 48px); /* leave space for NavCom panel + gaps */
+}
+.star-scope img{width:100%;height:auto;object-fit:contain;}
+.star-scope::before{
+  content:"";display:block;padding-top:calc(9/16*100%);
+}
+
+/* pill under StarScope – same as before */
 .pill-bottom{position:absolute;bottom:0;left:0;right:0;padding:8px 16px;
-  background:#fff4;border-radius:0 0 28px 28px;backdrop-filter:blur(10px);display:flex;justify-content:center;}
-.navcom-panel{width:360px;height:360px;background-color:var(--bg1);position:relative;overflow:hidden;}
-.navcom-panel img{width:100%;height:100%;object-fit:contain;}
+  background:#fff4;border-radius:0 0 28px 28px;backdrop-filter:blur(10px);
+  display:flex;justify-content:center;}
+
+/* NavCom panel – square, shrinks on small screens */
+.navcom-panel{
+  width:100%;max-width:360px;height:auto;aspect-ratio:1/1;
+  position:relative;background-color:var(--bg1);overflow:hidden;
+}
+.navcom-panel img{width:100%;height:auto;object-fit:contain;}
 .pill-a{position:absolute;bottom:0;left:0;right:0;padding:8px 16px;
-  background:#fff4;border-radius:0 0 28px 28px;backdrop-filter:blur(10px);display:flex;justify-content:center;}
-.btn{padding:8px 16px;font-size:14px;color:var(--text);background-color:var(--good);
-     border:none;border-radius:8px;margin:0 4px;cursor:pointer;transition:.2s;}
+  background:#fff4;border-radius:0 0 28px 28px;backdrop-filter:blur(10px);
+  display:flex;justify-content:center;}
+
+/* buttons */
+.btn{
+  padding:8px 16px;font-size:14px;color:var(--text);background-color:var(--good);
+  border:none;border-radius:8px;margin:0 4px;cursor:pointer;transition:.2s;
+}
 .btn-no{background-color:var(--bad);}
 .clicked{opacity:.7 !important;filter:brightness(.95) saturate(1.1);}
+
+/* --------------------- 3️⃣ Responsive tweaks -------------------------------- */
+@media(max-width:800px){
+  .card{flex-direction:column;align-items:center;}
+  .star-scope{max-width:100%;} /* let it take full width on mobile */
+}
 </style>
 </head>
-<body>
 
+<body>
 <div class="wrap">
   <!-- Topbar -->
   <div class="topbar">
     <div class="pill">NavData Computation</div>
-    <div class="pill" id="outline-pills">
+    <div class="pill" id="outline-pills"><!-- outline circles -->
       <button type="button" class="circle outline"></button>
       <button type="button" class="circle outline"></button>
       <button type="button" class="circle outline"></button>
     </div>
-    <div class="pill" id="filled-pills">
+    <div class="pill" id="filled-pills"><!-- filled circles -->
       <button type="button" class="circle filled"></button>
       <button type="button" class="circle filled"></button>
       <button type="button" class="circle filled"></button>
@@ -102,24 +145,20 @@ body::after{content:"";position:fixed;inset:0;background:repeating-linear-gradie
 </div>
 
 <script>
-// -----------------------------------------------------
-// Utility – image loader
-// -----------------------------------------------------
-const loadTextFile = url => fetch(url).then(r=>r.text()).catch(e=>{console.error('load error',url,e);return '';});
+/* --------------------------------- Utility ---------------------------------- */
+const loadTextFile = url => fetch(url).then(r=>r.text()).catch(e=>{
+  console.error('load error',url,e);return '';});
 
-let qPaths = [], aPaths = [];
-
-// Load Q.txt & A.txt
-Promise.all([loadTextFile('Q.txt'), loadTextFile('A.txt')]).then(([q, a]) => {
+/* -------------------------- Load image lists ------------------------------- */
+let qPaths=[], aPaths=[];
+Promise.all([loadTextFile('Q.txt'), loadTextFile('A.txt')]).then(([q,a])=>{
   qPaths = q.split('\n').filter(p=>p.trim());
   aPaths = a.split('\n').filter(p=>p.trim());
   if(qPaths.length) displayImage(qPaths);
   if(aPaths.length) displayAImage(aPaths);
 });
 
-// -----------------------------------------------------
-// Display functions
-// -----------------------------------------------------
+/* --------------------------- Display helpers -------------------------------- */
 function randomFrom(arr){return arr[Math.floor(Math.random()*arr.length)]}
 function displayImage(paths){
   const img=document.getElementById('starscope-img');
@@ -130,16 +169,13 @@ function displayAImage(paths){
   if(img) img.src=randomFrom(paths);
 }
 
-// -----------------------------------------------------
-// Button handlers
-// -----------------------------------------------------
-document.getElementById('generate-btn').addEventListener('click', () => {
-  displayImage(qPaths);
-});
+/* ---------------------------- Button events --------------------------------- */
+document.getElementById('generate-btn').addEventListener('click',()=>displayImage(qPaths));
+
 ['match','no-match'].forEach(id=>{
   const btn=document.getElementById(`${id}-btn`);
   if(btn){
-    btn.addEventListener('click', e=>{
+    btn.addEventListener('click',e=>{
       e.currentTarget.classList.add('clicked');
       setTimeout(()=>e.currentTarget.classList.remove('clicked'),200);
       console.log(`Button ${id} pressed`);
@@ -147,20 +183,18 @@ document.getElementById('generate-btn').addEventListener('click', () => {
   }
 });
 
-// -----------------------------------------------------
-// Circle pill toggles
-// -----------------------------------------------------
-function initCirclePill(pillId, type){
+/* --------------------------- Circle pill toggles ---------------------------- */
+function initCirclePill(pillId,type){
   const container=document.getElementById(pillId);
   if(!container) return;
   const circles=container.querySelectorAll('.circle');
-  circles.forEach(btn=>{
-    btn.addEventListener('click', e=>{
-      // toggle active state for this circle
-      btn.classList.toggle('active');
-      console.log(`Circle (${type}) ${e.currentTarget.dataset.idx} toggled`, btn.classList.contains('active'));
-      // optional: enforce only one active at a time:
-      // circles.forEach(c=>c!==btn&&c.classList.remove('active'));
+  circles.forEach((btn,i)=>{
+    btn.dataset.idx=i; // handy for debugging
+    btn.addEventListener('click',e=>{
+      e.currentTarget.classList.toggle('active');
+      console.log(`Circle (${type}) ${i} toggled`,e.currentTarget.classList.contains('active'));
+      /* uncomment to make only one active at a time:
+        circles.forEach(c=>c!==btn && c.classList.remove('active')); */
     });
   });
 }

@@ -1,14 +1,14 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Padua Redemption</title>
   <style>
-    :root{
+    :root {
       /* Sci-fi palette */
-      --bg0:#05070c;
-      --bg1:#070b12;
+      --bg0: #05070c;
+      --bg1: #070b12;
       --panel: rgba(10, 16, 26, 0.72);
       --panel2: rgba(8, 12, 20, 0.75);
       --border: rgba(110, 240, 255, 0.22);
@@ -21,34 +21,36 @@
       --good: rgba(120, 255, 200, 0.95);
       --bad: rgba(255, 120, 140, 0.95);
 
-      --shadow: rgba(0,0,0,0.55);
+      --shadow: rgba(0, 0, 0, 0.55);
       --glowC: rgba(110, 240, 255, 0.25);
       --glowP: rgba(180, 120, 255, 0.20);
     }
 
-    *{box-sizing:border-box}
-    html, body { height: 100%; }
-    body{
-      margin:0;
-      min-height:100vh;
-      display:grid;
-      place-items:center;
-      padding:28px;
-      color:var(--text);
+    * {
+      box-sizing: border-box;
+    }
+    html, body {
+      height: 100%;
+      margin: 0;
+    }
+    body {
+      display: grid;
+      place-items: center;
+      padding: 28px;
+      color: var(--text);
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
       background:
         radial-gradient(1200px 700px at 20% 15%, rgba(110,240,255,0.12), transparent 55%),
         radial-gradient(1000px 650px at 80% 30%, rgba(180,120,255,0.10), transparent 60%),
         linear-gradient(180deg, var(--bg0), var(--bg1));
-      overflow-x:hidden;
-      position:relative;
+      overflow-x: hidden;
     }
 
-    /* animated grid glow */
-    body::before{
-      content:"";
-      position:fixed;
-      inset:-40px;
+    /* Animated grid glow */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: -40px;
       background:
         linear-gradient(rgba(110,240,255,0.05) 1px, transparent 1px),
         linear-gradient(90deg, rgba(110,240,255,0.04) 1px, transparent 1px);
@@ -56,20 +58,20 @@
       transform: perspective(700px) rotateX(55deg) translateY(-140px);
       transform-origin: top;
       filter: blur(0.2px);
-      opacity:0.35;
-      pointer-events:none;
+      opacity: 0.35;
+      pointer-events: none;
       animation: drift 12s linear infinite;
     }
-    @keyframes drift{
+    @keyframes drift {
       from { background-position: 0 0, 0 0; }
       to   { background-position: 0 176px, 176px 0; }
     }
 
-    /* scanlines */
-    body::after{
-      content:"";
-      position:fixed;
-      inset:0;
+    /* Scanlines */
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
       background: repeating-linear-gradient(
         to bottom,
         rgba(255,255,255,0.028),
@@ -77,242 +79,192 @@
         transparent 1px,
         transparent 6px
       );
-      opacity:0.10;
+      opacity: 0.10;
       mix-blend-mode: overlay;
-      pointer-events:none;
+      pointer-events: none;
     }
 
-    .wrap{width:min(1040px,100%); text-align:center;}
-    h1{
-      margin: 0 0 16px;
-      font-size: clamp(30px, 4.4vw, 52px);
-      letter-spacing: .12em;
-      text-transform: uppercase;
-      font-weight: 800;
-      color: var(--text);
-      text-shadow:
-        0 0 18px rgba(110,240,255,0.18),
-        0 0 28px rgba(180,120,255,0.12);
+    .wrap {
+      width: min(1040px, 100%);
+      text-align: center;
     }
 
-    .card{
-      background: linear-gradient(180deg, rgba(10,16,26,0.78), rgba(7,10,16,0.72));
-      border: 1px solid rgba(110,240,255,0.18);
-      border-radius: 18px;
+    /* Main Card Container */
+    .card {
+      display: flex;
+      gap: 24px;
+      padding: 24px;
+      background-color: var(--bg1);
+      border-radius: 28px;
       box-shadow:
         0 18px 60px rgba(0,0,0,0.55),
         0 0 0 1px rgba(180,120,255,0.10) inset;
-      padding: 18px;
-      text-align:left;
-      position:relative;
-      overflow:hidden;
+      width: fit-content;
     }
 
-    .topbar{
-      display:flex;
-      gap:12px;
-      flex-wrap:wrap;
-      align-items:stretch;
-      justify-content:space-between;
-      margin-bottom:12px;
-      position:relative;
-      z-index:1;
+    /* StarScope Panel (16:9 aspect ratio) */
+    .star-scope {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+      background-color: var(--bg1);
     }
-/* StarScope Panel */
-.star-scope {
-  width: 640px;
-  height: 360px; /* 9:16 aspect ratio (width=360) */
-  position: relative;
-  overflow: hidden;
-  background-color: var(--bg1);
-}
+    .star-scope img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
 
-.star-scope img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
+    /* Pill under StarScope */
+    .pill {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 8px 16px;
+      background-color: rgba(255,255,255,0.04);
+      backdrop-filter: blur(10px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      pointer-events: auto;
+    }
 
-/* Pill at bottom of StarScope */
-.pill {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 8px 16px;
-  background-color: rgba(255, 255, 255, 0.04);
-  backdrop-filter: blur(10px);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
+    /* NavCom-Panel (360x360 square) */
+    .navcom-panel {
+      width: 360px;
+      height: 360px;
+      position: relative;
+      overflow: hidden;
+      background-color: var(--bg1);
+    }
+    .navcom-panel img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
 
-/* Generate Button */
-#generate-btn {
-  padding: 10px 20px;
-  font-size: 16px;
-  color: var(--text);
-  background-color: var(--cyan);
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
+    /* Pill for NavCom-Panel Buttons */
+    .pill-a {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 8px 16px;
+      background-color: rgba(255,255,255,0.04);
+      backdrop-filter: blur(10px);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+    }
 
-#generate-btn:hover {
-  background-color: var(--glowC);
-}
-.NavCom-Panel {
-  width: 360px;
-  height: 360px;
-  margin-left: 24px;
-  position: relative;
-  overflow: hidden;
-  background-color: var(--bg1);
-}
+    /* Buttons with animation */
+    .btn {
+      padding: 8px 16px;
+      font-size: 14px;
+      color: var(--text);
+      background-color: var(--good); /* Match button */
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .btn-no {
+      background-color: var(--bad); /* No Match button */
+    }
 
-/* A Image Scaling (contain) */
-#NavCom-image {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  display: block;
-}
-
-/* Pill for A Panel Buttons */
-.pill-NavCom {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 8px 16px;
-  background-color: rgba(255, 255, 255, 0.04);
-  backdrop-filter: blur(10px);
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-}
-
-/* A Panel Buttons */
-#match-btn,
-#no-match-btn {
-  padding: 8px 16px;
-  font-size: 14px;
-  color: var(--text);
-  background-color: var(--good); /* Match */
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-#no-match-btn {
-  background-color: var(--bad); /* No Match */
-}
+    /* Button dim effect on click */
+    .clicked {
+      opacity: 0.7 !important;
+      filter: brightness(0.95) saturate(1.1);
+    }
   </style>
 </head>
 <body>
 
-  <!-- Title Card -->
   <div class="wrap">
-    <h1>Padua Redemption</h1>
-
-    <!-- Main Content Area -->
     <div class="card">
       <!-- StarScope Panel -->
       <div class="star-scope">
         <img id="starscope-img" src="" alt="StarScope Image" />
         <div class="pill">
-          <button id="generate-btn">Generate New</button>
+          <button id="generate-btn" class="btn">Generate New</button>
         </div>
       </div>
 
-<div class="NavCom-Panel">
-  <img id="a-image" src="" alt="A Image" />
-  <div class="pill-a">
-    <button id="match-btn">Match</button>
-    <button id="no-match-btn">No Match</button>
-  </div>
-</div>
+      <!-- NavCom-Panel -->
+      <div class="navcom-panel">
+        <img id="a-image" src="" alt="A Image" />
+        <div class="pill-a">
+          <button id="match-btn" class="btn">Match</button>
+          <button id="no-match-btn" class="btn btn-no">No Match</button>
+        </div>
       </div>
     </div>
   </div>
+
+  <script>
+    // Global arrays for image paths
+    let imagePaths = [];
+    let aImagePaths = [];
+
+    // Load Q.txt (StarScope images)
+    fetch('Q.txt')
+      .then(res => res.text())
+      .then(data => {
+        imagePaths = data.split('\n').filter(p => p.trim() !== '');
+        if (imagePaths.length > 0) displayImage(imagePaths);
+      })
+      .catch(err => console.error('Error loading Q.txt:', err));
+
+    // Load A.txt (NavCom-Panel images)
+    fetch('A.txt')
+      .then(res => res.text())
+      .then(data => {
+        aImagePaths = data.split('\n').filter(p => p.trim() !== '');
+        if (aImagePaths.length > 0) displayAImage(aImagePaths);
+      })
+      .catch(err => console.error('Error loading A.txt:', err));
+
+    // Display a random image from Q.txt
+    function displayImage(paths) {
+      const img = document.getElementById("starscope-img");
+      const btn = document.getElementById("generate-btn");
+
+      if (!img || !btn) return;
+
+      const randomIndex = Math.floor(Math.random() * paths.length);
+      img.src = paths[randomIndex];
+    }
+
+    // Display a random image from A.txt
+    function displayAImage(paths) {
+      const img = document.getElementById("a-image");
+      const btnMatch = document.getElementById("match-btn");
+      const btnNoMatch = document.getElementById("no-match-btn");
+
+      if (!img || !btnMatch || !btnNoMatch) return;
+
+      const randomIndex = Math.floor(Math.random() * paths.length);
+      img.src = paths[randomIndex];
+    }
+
+    // "Generate New" button click handler
+    document.getElementById("generate-btn").addEventListener("click", () => {
+      displayImage(imagePaths);
+    });
+
+    // "Match" button animation
+    document.getElementById("match-btn").addEventListener("click", () => {
+      this.classList.add('clicked');
+      setTimeout(() => this.classList.remove('clicked'), 200);
+    });
+
+    // "No Match" button animation
+    document.getElementById("no-match-btn").addEventListener("click", () => {
+      this.classList.add('clicked');
+      setTimeout(() => this.classList.remove('clicked'), 200);
+    });
+  </script>
 </body>
-<Script> 
-// Global variables to store image paths from Q.txt and A.txt
-let imagePaths = [];
-let aImagePaths = [];
-
-// Load image paths from Q.txt on page load
-fetch('Q.txt')
-  .then(res => res.text())
-  .then(data => {
-    // Parse the file into an array of image paths
-    imagePaths = data.split('\n').filter(path => path.trim() !== '');
-
-    if (imagePaths.length === 0) {
-      alert("No images found in Q.txt");
-      return;
-    }
-
-    displayImage(imagePaths);
-  })
-  .catch(error => console.error('Error loading Q.txt:', error));
-
-// Load image paths from A.txt on page load
-fetch('A.txt')
-  .then(res => res.text())
-  .then(data => {
-    // Parse the file into an array of image paths
-    aImagePaths = data.split('\n').filter(path => path.trim() !== '');
-
-    if (aImagePaths.length === 0) {
-      alert("No images found in A.txt");
-      return;
-    }
-
-    displayAImage(aImagePaths);
-  })
-  .catch(error => console.error('Error loading A.txt:', error));
-
-function displayImage(paths) {
-  const img = document.getElementById("starscope-img");
-  const btn = document.getElementById("generate-btn");
-
-  if (!btn || !img) return;
-
-  const randomIndex = Math.floor(Math.random() * paths.length);
-  img.src = paths[random,Index];
-}
-
-function displayAImage(paths) {
-  const img = document.getElementById("a-image");
-  const btnMatch = document.getElementById("match-btn");
-  const btnNoMatch = document.getElementById("no-match-btn");
-
-  if (!img || !btnMatch || !btnNoMatch) return;
-
-  const randomIndex = Math.floor(Math.random() * paths.length);
-  img.src = paths[randomIndex];
-}
-
-// "Generate New" button click handler
-document.getElementById("generate-btn").addEventListener("click", () => {
-  displayImage(imagePaths);
-});
-
-// "Match" and "No Match" buttons (add your logic here)
-document.getElementById("match-btn").addEventListener("click", () => {
-  // Example: log a match
-  console.log("Match clicked!");
-});
-
-document.getElementById("no-match-btn").addEventListener("click", () => {
-  // Example: log a no match
-  console.log("No Match clicked!");
-});
-
-
-
-</Script>
 </html>

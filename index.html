@@ -118,302 +118,86 @@
       position:relative;
       z-index:1;
     }
-
-    .pill{
-      flex:1 1 280px;
-      background: linear-gradient(180deg, rgba(10,16,26,0.70), rgba(8,12,20,0.62));
-      border: 1px solid rgba(110,240,255,0.16);
-      border-radius: 16px;
-      padding: 12px 12px;
-      min-height: 62px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      box-shadow:
-        0 0 0 1px rgba(180,120,255,0.08) inset,
-        0 12px 28px rgba(0,0,0,0.25);
-    }
-
-    .sub{ color: var(--muted); font-size: 13px; }
-    .mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
-
-    .grid{
-      display:grid;
-      grid-template-columns: 1.25fr 0.75fr;
-      gap:12px;
-      position:relative;
-      z-index:1;
-    }
-    @media (max-width: 980px){ .grid{grid-template-columns:1fr;} }
-
-    .panel{
-      background: linear-gradient(180deg, rgba(10,16,26,0.72), rgba(8,12,20,0.64));
-      border: 1px solid rgba(110,240,255,0.15);
-      border-radius: 18px;
-      padding: 14px;
-      box-shadow: 0 14px 32px rgba(0,0,0,0.26);
-    }
-
-    .label{
-      font-size: 12px;
-      letter-spacing:.22em;
-      text-transform:uppercase;
-      color: rgba(235,250,255,0.70);
-      margin:0 0 10px;
-    }
-
-    .scopeWrap {
-  border: 1px solid rgba(110,240,255,0.16);
-  border-radius: 16px;
-  overflow: hidden; /* Prevents image from overflowing */
+/* StarScope Panel */
+.star-scope {
+  width: 360px;
+  height: 640px; /* 9:16 aspect ratio (width=360) */
   position: relative;
-  width: 100%;
-  height: 360px; /* Keep this fixed for layout consistency */
-  box-shadow: 0 0 28px rgba(110,240,255,0.08);
+  overflow: hidden;
+  background-color: var(--bg1);
 }
 
-
-    canvas{display:block; width:100%; height:auto;}
-
-    .meters{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      margin-top:10px;
-    }
-    .meter{
-      flex:1 1 240px;
-      border: 1px solid rgba(110,240,255,0.14);
-      border-radius: 16px;
-      padding: 10px 12px;
-      background: rgba(6,10,16,0.60);
-      box-shadow: 0 0 0 1px rgba(180,120,255,0.06) inset;
-    }
-
-    .bar{
-      height: 12px;
-      border-radius: 999px;
-      border: 1px solid rgba(110,240,255,0.14);
-      background: rgba(255,255,255,0.05);
-      overflow:hidden;
-      margin-top:8px;
-    }
-    .bar > div{
-      height:100%;
-      width:0%;
-      background: linear-gradient(90deg, rgba(110,240,255,0.95), rgba(180,120,255,0.95));
-      box-shadow: 0 0 14px rgba(110,240,255,0.22);
-    }
-
-    .controls{
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-    }
-    .control{
-      border: 1px solid rgba(110,240,255,0.14);
-      border-radius: 16px;
-      padding: 10px 12px;
-      background: rgba(6,10,16,0.60);
-      box-shadow: 0 0 0 1px rgba(180,120,255,0.06) inset;
-    }
-    .control .row{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      flex-wrap:wrap;
-    }
-
-    /* futuristic sliders */
-    input[type="range"]{
-      width:100%;
-      margin-top:10px;
-      accent-color: rgba(110,240,255,0.9);
-    }
-
-    /* buttons */
-    button{
-      border: 1px solid rgba(110,240,255,0.18);
-      background: linear-gradient(180deg, rgba(18,28,44,0.75), rgba(8,12,20,0.70));
-      color: var(--text);
-      padding: 10px 14px;
-      border-radius: 999px;
-      cursor:pointer;
-      font-weight: 750;
-      letter-spacing:.06em;
-      text-transform: uppercase;
-      font-size: 12px;
-      transition: transform .08s ease, filter .12s ease, box-shadow .12s ease;
-      box-shadow:
-        0 0 0 1px rgba(180,120,255,0.06) inset,
-        0 10px 18px rgba(0,0,0,0.24);
-      white-space:nowrap;
-    }
-    button:hover{
-      filter: brightness(1.12);
-      box-shadow:
-        0 0 0 1px rgba(180,120,255,0.10) inset,
-        0 0 22px rgba(110,240,255,0.10);
-    }
-    button:active{ transform: scale(.98); }
-
-    .rowBtns{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      justify-content:space-between;
-      align-items:center;
-      margin-top:10px;
-    }
-
-    .msg{
-      margin-top:10px;
-      padding:12px 12px;
-      border-radius: 16px;
-      border: 1px solid rgba(110,240,255,0.14);
-      background: rgba(6,10,16,0.60);
-      font-size: 14px;
-      display:none;
-      box-shadow: 0 0 0 1px rgba(180,120,255,0.06) inset;
-    }
-    .msg.ok{
-      border-color: rgba(120,255,200,0.22);
-      box-shadow: 0 0 22px rgba(120,255,200,0.12);
-    }
-    .msg.bad{
-      border-color: rgba(255,120,140,0.24);
-      box-shadow: 0 0 22px rgba(255,120,140,0.12);
-    }
-
-    .reward{
-      margin-top:10px;
-      padding:14px 12px;
-      border-radius: 16px;
-      border: 1px solid rgba(120,255,200,0.25);
-      background: rgba(10,20,16,0.62);
-      display:none;
-      text-align:center;
-      font-weight: 900;
-      letter-spacing: .16em;
-      text-transform: uppercase;
-      box-shadow:
-        0 0 30px rgba(120,255,200,0.14),
-        0 0 0 1px rgba(180,120,255,0.06) inset;
-    }
-
-    .footerNote{
-      margin-top:10px;
-      font-size:12px;
-      color: rgba(235,250,255,0.55);
-      text-align:center;
-      letter-spacing:.08em;
-      text-transform: uppercase;
-    }
-    .kbd{
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      font-size: 12px;
-      border: 1px solid rgba(110,240,255,0.18);
-      background: rgba(255,255,255,0.06);
-      padding: 2px 7px;
-      border-radius: 10px;
-      box-shadow: 0 0 12px rgba(110,240,255,0.10);
-    }
-
-.scope-img {
-  position: absolute;
-  top: 0;
-  left: 0;
+.star-scope img {
   width: 100%;
   height: 100%;
-  object-fit: contain; /* Scales the image to fit within container, preserving aspect ratio */
-  transform: scale(1); /* No zoom unless you change this */
+  object-fit: cover;
 }
 
-  </style>
-</head>
-<body>
-  <div class="wrap">
-    <h1>Padua Redemption</h1>
+/* Pill at bottom of StarScope */
+.pill {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 8px 16px;
+  background-color: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(10px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 
-    <div class="card" role="application" aria-label="Waveform Decoder Minigame">
-      <div class="topbar">
-        <div class="pill">
-          <div>
-            <div><strong>Quantum Relay</strong> <span class="sub">Waveform Decoder</span></div>
-            <div class="sub">Score: <span id="score">0</span> • Streak: <span id="streak">0</span></div>
-          </div>
-          <div class="sub">Round <span id="round">1</span></div>
-        </div>
+/* Generate Button */
+#generate-btn {
+  padding: 10px 20px;
+  font-size: 16px;
+  color: var(--text);
+  background-color: var(--cyan);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
 
-        <div class="pill">
-          <div>
-            <div><strong>Stability Window</strong></div>
-            <div class="sub">Time left: <span id="timeLeft">120</span>s</div>
-          </div>
-          <div class="sub mono" id="timerBar" aria-hidden="true">████████████████</div>
-        </div>
-
-        <div class="pill">
-          <div>
-            <div><strong>Objective</strong></div>
-            <div class="sub">Match the target waveform ≥ <span id="goalPct">96</span>%</div>
-          </div>
-          <div class="sub">Similarity: <strong><span id="simPct">0</span>%</strong></div>
-        </div>
-      </div>
-
-      <div class="grid">
-        <div class="panel">
-          <div class="label">Optical Spectrum Display</div>
-          <div class="scopeWrap" aria-label="Optical Output">
-            <!-- Image placeholder -->
-            <img src="starPlan.jpg" alt="Optical Imaging" class="scope-img">
-          </div>
-        </div>
-
-        <div class="panel">
-          <div class="label">Decoder Controls</div>
-          <!-- Removed all interactive elements (sliders, buttons, etc.) -->
-        </div>
-      </div>
-
-      <div class="footerNote">Janus Ortu Optical Sensor Telemetry • Navigation BTS Module • v14.3652.991b</div>
-    </div>
-  </div>
-</body>
-
-
-<script>  
-document.addEventListener("DOMContentLoaded", () => {
-  const imageContainer = document.getElementById("dynamicImage");
-  const generateBtn = document.getElementById("generateBtn");
-
-  // Read Q.txt file and load images
-  fetch('Q.txt')
-    .then(response => response.text())
-    .then(data => {
-      const imageFiles = data.split('\n').map(line => line.trim()).filter(file => file !== '');
-      if (imageFiles.length === 0) return;
-
-      // Display a random image on load
-      showRandomImage(imageFiles);
-      
-      // Add event listener to "Generate New" button
-      generateBtn.addEventListener("click", () => {
-        showRandomImage(imageFiles);
-      });
-    })
-    .catch(err => console.error('Failed to load Q.txt:', err));
-
-  function showRandomImage(files) {
-    const randomFile = files[Math.floor(Math.random() * files.length)];
-    imageContainer.src = randomFile;
-  }
-});
-
-</script>
+#generate-btn:hover {
+  background-color: var(--glowC);
+}
 
 
 </html>
+<Script> 
+// Load image paths from Q.txt and display one random image
+fetch('Q.txt')
+  .then(res => res.text())
+  .then(data => {
+    const imagePaths = data.split('\n').filter(path => path.trim() !== '');
+    
+    if (imagePaths.length === 0) {
+      alert("No images found in Q.txt");
+      return;
+    }
+
+    // Display a random image
+    displayImage(imagePaths);
+  })
+  .catch(error => console.error('Error loading Q.txt:', error));
+
+function displayImage(paths) {
+  const img = document.getElementById('starscope-img');
+  const btn = document.getElementById('generate-btn');
+
+  if (!btn) return;
+
+  const randomIndex = Math.floor(Math.random() * paths.length);
+  const imagePath = paths[randomIndex];
+  
+  // Ensure image is relative or absolute path
+  img.src = imagePath;
+}
+
+// Generate New button click handler
+document.getElementById('generate-btn').addEventListener('click', () => {
+  displayImage(Q.txtPaths); // Reuse the same list from Q.txt
+});
+
+</Script>

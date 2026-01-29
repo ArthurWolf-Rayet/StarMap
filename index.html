@@ -136,17 +136,18 @@
       align-items: center;
     }
 
-/* ------------- Second pill – circles -------------- */
-.pill:nth-child(2) {
-    /* keep your existing gap/spacing rules …       */
-}
+    /* Circles in second pill */
+    .pill:nth-child(2)::before::after,
+    .pill:nth-child(2)::before::before,
+    .pill:nth-child(2)::before::first-child {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: transparent; /* Outline only */
+      border: 1px solid var(--border);
+    }
 
-.pill:nth-child(2) > span {            /* ← NEW RULE!          */
-    width: .5rem;                      /* 8 px (if 1rem = 16 px) */
-    height: .5rem;
-    border-radius: 50%;                 /* circle                */
-    background-color: transparent;      /* outline only         */
-    border: 1px solid var(--border);   /* use your “border” colour */
     /* Third pill (filled circles) */
     .pill:nth-child(3) {
       flex: 0 0 auto;
@@ -160,14 +161,16 @@
       align-items: center;
     }
 
-/* ------------- Third pill – filled circles -------------- */
-.pill:nth-child(3) > span {
-    width: .5rem;
-    height: .5rem;
-    border-radius: 50%;
-    background-color: var(--border);   /* solid circle with same colour as outline ones */
-}
-
+    /* Circles in third pill */
+    .pill:nth-child(3)::before::after,
+    .pill:nth-child(3)::before::before,
+    .pill:nth-child(3)::before::first-child {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: var(--border); /* Filled with border color */
+    }
 
     /* Main Card Container */
     .card {
@@ -266,9 +269,7 @@
     <!-- Topbar with three pills -->
     <div class="topbar">
       <div class="pill"></div> <!-- Title pill -->
-<div class="pill">
-    <span></span><span></span><span></span>
-</div>
+      <div class="pill"></div> <!-- Outline circles -->
       <div class="pill"></div> <!-- Filled circles -->
     </div>
 

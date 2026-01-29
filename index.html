@@ -162,6 +162,53 @@
 #generate-btn:hover {
   background-color: var(--glowC);
 }
+.NavCom-Panel {
+  width: 360px;
+  height: 360px;
+  margin-left: 24px;
+  position: relative;
+  overflow: hidden;
+  background-color: var(--bg1);
+}
+
+/* A Image Scaling (contain) */
+#NavCom-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+/* Pill for A Panel Buttons */
+.pill-NavCom {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 8px 16px;
+  background-color: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(10px);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+/* A Panel Buttons */
+#match-btn,
+#no-match-btn {
+  padding: 8px 16px;
+  font-size: 14px;
+  color: var(--text);
+  background-color: var(--good); /* Match */
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+#no-match-btn {
+  background-color: var(--bad); /* No Match */
+}
   </style>
 </head>
 <body>
@@ -180,15 +227,21 @@
         </div>
       </div>
 
-      <!-- Optional: Other Panel (e.g. for additional content) -->
-      <div class="other-panel">
-        <!-- Future content goes here -->
+<div class="NavCom-Panel">
+  <img id="a-image" src="" alt="A Image" />
+  <div class="pill-a">
+    <button id="match-btn">Match</button>
+    <button id="no-match-btn">No Match</button>
+  </div>
+</div>
       </div>
     </div>
   </div>
 </body>
 <Script> 
+// Global variables to store image paths from Q.txt and A.txt
 let imagePaths = [];
+let aImagePaths = [];
 
 // Load image paths from Q.txt on page load
 fetch('Q.txt')
@@ -202,10 +255,25 @@ fetch('Q.txt')
       return;
     }
 
-    // Display a random image on load
     displayImage(imagePaths);
   })
   .catch(error => console.error('Error loading Q.txt:', error));
+
+// Load image paths from A.txt on page load
+fetch('A.txt')
+  .then(res => res.text())
+  .then(data => {
+    // Parse the file into an array of image paths
+    aImagePaths = data.split('\n').filter(path => path.trim() !== '');
+
+    if (aImagePaths.length === 0) {
+      alert("No images found in A.txt");
+      return;
+    }
+
+    displayAImage(aImagePaths);
+  })
+  .catch(error => console.error('Error loading A.txt:', error));
 
 function displayImage(paths) {
   const img = document.getElementById("starscope-img");
@@ -214,13 +282,36 @@ function displayImage(paths) {
   if (!btn || !img) return;
 
   const randomIndex = Math.floor(Math.random() * paths.length);
+  img.src = paths[random,Index];
+}
+
+function displayAImage(paths) {
+  const img = document.getElementById("a-image");
+  const btnMatch = document.getElementById("match-btn");
+  const btnNoMatch = document.getElementById("no-match-btn");
+
+  if (!img || !btnMatch || !btnNoMatch) return;
+
+  const randomIndex = Math.floor(Math.random() * paths.length);
   img.src = paths[randomIndex];
 }
 
 // "Generate New" button click handler
 document.getElementById("generate-btn").addEventListener("click", () => {
-  displayImage(imagePaths); // Use the same list from Q.txt
+  displayImage(imagePaths);
 });
+
+// "Match" and "No Match" buttons (add your logic here)
+document.getElementById("match-btn").addEventListener("click", () => {
+  // Example: log a match
+  console.log("Match clicked!");
+});
+
+document.getElementById("no-match-btn").addEventListener("click", () => {
+  // Example: log a no match
+  console.log("No Match clicked!");
+});
+
 
 
 </Script>

@@ -193,7 +193,7 @@ fetch('Q.txt')
   .then(res => res.text())
   .then(data => {
     const imagePaths = data.split('\n').filter(path => path.trim() !== '');
-    
+
     if (imagePaths.length === 0) {
       alert("No images found in Q.txt");
       return;
@@ -219,8 +219,9 @@ function displayImage(paths) {
 
 // Generate New button click handler
 document.getElementById('generate-btn').addEventListener('click', () => {
-  displayImage(Q.txtPaths); // Reuse the same list from Q.txt
+  displayImage(imagePaths); // Use the same list from Q.txt
 });
+
 
 </Script>
 </html>
